@@ -1,0 +1,9 @@
+div .nav{
+    background: linear-gradient(-90deg, rgba(0, 36, 36, 1) 0%, rgba(18, 2, 57, 1) 28%, rgba(80, 5, 73, 1) 100%);;
+}
+
+div .nav h1 {
+    margin-left: 1rem;
+    color: white;
+    cursor: pointer;
+}
