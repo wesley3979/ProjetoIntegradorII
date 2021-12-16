@@ -4,5 +4,5 @@ module.exports = {
   port: 3306,
   username: 'root',
   password: '',
-  database: 'testesequilize'
+  database: 'torneiodb'
 }
