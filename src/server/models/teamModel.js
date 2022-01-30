@@ -1,8 +1,8 @@
 const connection = require('../database')
 const { Model, DataTypes } = require('sequelize')
-const User = require('./user')
+const User = require('./userModel')
 
-class Team extends Model {}
+class Team extends Model { }
 
 Team.init({
   teamId: {
@@ -17,7 +17,7 @@ Team.init({
     allowNull: false
   },
 
-  abbreviation:{
+  abbreviation: {
     type: DataTypes.STRING(4),
     allowNull: false,
   },
@@ -32,21 +32,24 @@ Team.init({
       key: 'userId'
     },
     allowNull: false
-  },      
+  },
 
-  numberOfPlayers:{
+  numberOfPlayers: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
 
   image: DataTypes.STRING
-   
-},
-{
-  sequelize: connection,
-  modelName: 'Team',
-  freezeTableName: true,
-  timestamps: false,
-})
 
-Team.belongsTo(User);
+},
+  {
+    sequelize: connection,
+    modelName: 'Team',
+    freezeTableName: true,
+    timestamps: false,
+  })
+
+Team.belongsTo(User)
+
+module.exports = Team
+

@@ -2,10 +2,10 @@ const express = require('express')
 const app = express()
 const routes = require('./routes')
 
-require('./database')
+require('./database/db')
 
 app.use(express.json())
 routes(app)
-app.listen(4000, () => {
-  console.log('Rodando na porta: 4000');
+app.listen(3007, () => {
+  console.log('Rodando na porta: 3007');
 })
