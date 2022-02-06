@@ -5,7 +5,8 @@ const User = require('../models/userModel')
 const Championship = require('../models/championshipModel')
 const Match = require('../models/matchModel')
 
-
+const getToken = require('../helpers/get-token')
+const getUserByToken = require('../helpers/get-user-by-token');
 
 class TeamController {
 
@@ -13,29 +14,47 @@ class TeamController {
     try {
 
       const { body } = req
-
       const {
         name,
         abbreviation,
-        creatorUserId,
         numberOfPlayers,
-        image,
-        UserId
+        image
       } = body
 
-      const exists = await Team.findOne({ where: { name } })
-
-      if (exists) {
-        return res.status(400).json({ message: `Já existe um time cadastrado com o nome: '${name}'.` })
+      if (!name) {
+        return res.status(400).json({ message: 'O nome do time não pode ser vazio.' })
       }
+
+      if (!abbreviation) {
+        return res.status(400).json({ message: 'Erro a abrevição do nome do time deve ter 3 ou 4 caracteres.' })
+      }
+
+      if (abbreviation.length < 3 || abbreviation.length > 4)
+        return res.status(400).json({ message: 'Erro a abrevição do nome do time deve ter 3 ou 4 caracteres.' })
+
+      if (!numberOfPlayers) {
+        return res.status(400).json({ message: 'Erro o número de jogadores deve ser preenchido com o número inteiro' })
+      }
+
+      if (typeof numberOfPlayers !== 'number') {
+        return res.status(400).json({ message: 'Erro o número de jogadores deve ser preenchido com o número inteiro' })
+      }
+
+      const token = getToken(req)
+      const validateTokenWithUserId = await getUserByToken(token)
+
+      if (!validateTokenWithUserId)
+        return res.status(422).json({ message: `Token inválido.` })
+
+      const teamByName = await Team.findOne({ where: { name } })
+      if (teamByName) return res.status(422).json({ message: `Já existe um time cadastrado com este nome.` })
 
       const createdTeam = await Team.create({
         name,
         abbreviation,
-        creatorUserId,
         numberOfPlayers,
-        image,
-        UserId
+        creatorUserId: validateTokenWithUserId.userId,
+        image
       })
 
       return res.status(201).json({ createdTeam })
@@ -51,26 +70,57 @@ class TeamController {
     const {
       name,
       abbreviation,
-      creatorUserId,
       numberOfPlayers,
-      image,
-      UserId
+      image
     } = body
 
-    const exists = await Team.findOne({ where: { name } })
-
-    if (exists) {
-      return res.status(400).json({ message: `Já existe um time cadastrado com o nome: '${name}'.` })
+    if (!name) {
+      return res.status(400).json({ message: 'O nome do time não pode ser vazio.' })
     }
+
+    if (!abbreviation) {
+      return res.status(400).json({ message: 'Erro a abrevição do nome do time deve ter 3 ou 4 caracteres.' })
+    }
+
+    if (abbreviation.length < 3 || abbreviation.length > 4)
+      return res.status(400).json({ message: 'Erro a abrevição do nome do time deve ter 3 ou 4 caracteres.' })
+
+    if (!numberOfPlayers) {
+      return res.status(400).json({ message: 'Erro o número de jogadores deve ser preenchido com o número inteiro' })
+    }
+
+    if (typeof numberOfPlayers !== 'number') {
+      return res.status(400).json({ message: 'Erro o número de jogadores deve ser preenchido com o número inteiro' })
+    }
+
+    const token = getToken(req)
+    const validateTokenWithUserId = await getUserByToken(token)
+
+    if (!validateTokenWithUserId)
+      return res.status(422).json({ message: `Token inválido.` })
+
+    const teamsByName = await Team.findAll({ where: { name } })
+
+    let userHasAuth = false
+
+    teamsByName.forEach(teamByName => {
+
+      if (teamByName.teamId != id)
+        return res.status(422).json({ message: `Já existe um time cadastrado com este nome.` })
+
+      //verify user has authorization for update Team
+      if (teamByName.creatorUserId == validateTokenWithUserId.userId)
+        userHasAuth = true
+    });
+
+    if (!userHasAuth) return res.status(422).json({ message: `Somente o criador da equipe pode atualiza-la.` })
 
     try {
       await Team.update({
         name,
         abbreviation,
-        creatorUserId,
         numberOfPlayers,
         image,
-        UserUserId
       }, {
         where: { teamId: id }
       })
@@ -162,7 +212,11 @@ class TeamController {
       let result = await Team.findByPk(id, {
         include: User
       })
-      if (result) result.password = undefined
+      if (result) {
+        result.Users.forEach(user => {
+          user.password = undefined
+        })
+      }
 
       return res.status(200).json({ result })
 
@@ -175,25 +229,25 @@ class TeamController {
     try {
 
       const { userid, teamid } = req.params
-      const token = getToken(req)
-      const validateTokenWithUserId = await getUserByToken(token)
-      if (validateTokenWithUserId) {
-        if (validateTokenWithUserId.userId != userid) {
-          return res.status(401).json({ message: `O token informado não corresponde ao Id dos parâmetros` })
-        }
-      }
-      else return res.status(401).json({ message: `O token informado não corresponde a nenhum usuário` })
-
-      const user = await User.findByPk(userid)
-
-      if (!user) {
-        return res.status(400).json({ message: 'Erro ao remover jogador da equipe, pois o usuário informado não existe.' })
-      }
 
       const team = await Team.findByPk(teamid)
 
       if (!team) {
         return res.status(400).json({ message: 'Erro ao remover jogador da equipe, pois a equipe informada não existe.' })
+      }
+
+      const token = getToken(req)
+      const validateTokenWithUserId = await getUserByToken(token)
+
+      if (validateTokenWithUserId) {
+        if (validateTokenWithUserId.userId != userid && validateTokenWithUserId.userId != team.creatorUserId)
+          return res.status(401).json({ message: `Você não tem autorização para remover este jogador da equipe` })
+      }
+
+      const user = await User.findByPk(userid)
+
+      if (!user) {
+        return res.status(400).json({ message: 'Erro ao remover jogador da equipe, pois o usuário informado não existe.' })
       }
 
       const result = await user.removeTeam(team)

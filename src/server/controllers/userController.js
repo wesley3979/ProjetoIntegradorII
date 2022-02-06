@@ -231,7 +231,10 @@ class UserController {
   }
 
   async getAllUsers(req, res) {
-    const allUsers = await User.findAll()
+    let allUsers = await User.findAll()
+    allUsers.forEach(user => {
+      user.password = undefined
+    });
 
     return res.status(200).json({ allUsers })
   }

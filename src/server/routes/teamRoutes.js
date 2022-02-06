@@ -5,7 +5,7 @@ const teamController = require('../controllers/teamController');
 const checkToken = require('../helpers/check-token') //middleware
 
 routes.post('/create', checkToken, teamController.createTeam)
-routes.post('/update/:id', checkToken, teamController.updateTeam)
+routes.post('/:id/update', checkToken, teamController.updateTeam)
 routes.get('/:id', checkToken, teamController.getTeamById)
 routes.delete('/:teamid/user/:userid', checkToken, teamController.RemoveUserFromTeam)
 routes.delete('/delete/:id', checkToken, teamController.deleteTeam)

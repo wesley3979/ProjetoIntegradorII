@@ -31,6 +31,11 @@ Team.init({
     allowNull: false,
   },
 
+  creatorUserId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+
   image: DataTypes.STRING
 
 },
