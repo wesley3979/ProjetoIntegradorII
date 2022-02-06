@@ -1,9 +1,13 @@
 const connection = require('../database')
 const { Model, DataTypes } = require('sequelize')
+
 const User = require('./userModel')
+const TeamUser = require('./teamUserModel')
+
+const Championship = require('./championshipModel')
+const TeamChampionship = require('./teamChampionshipModel')
 
 class Team extends Model { }
-
 Team.init({
   teamId: {
     type: DataTypes.INTEGER,
@@ -14,24 +18,12 @@ Team.init({
 
   name: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
 
   abbreviation: {
-    type: DataTypes.STRING(4),
+    type: DataTypes.STRING,
     allowNull: false,
-  },
-
-  creatorUserId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: {
-        tableName: 'user'
-      },
-      key: 'userId'
-    },
-    allowNull: false
   },
 
   numberOfPlayers: {
@@ -47,9 +39,52 @@ Team.init({
     modelName: 'Team',
     freezeTableName: true,
     timestamps: false,
-  })
+  }
+)
 
-Team.belongsTo(User)
+//RELACIONAMENTO N:N (User - Team)
+Team.belongsToMany(User, {
+  through: {
+    model: TeamUser
+  },
+  foreignKey: 'teamId',
+  constraint: true
+})
+
+User.belongsToMany(Team, {
+  through: {
+    model: TeamUser
+  },
+  foreignKey: 'userId',
+  constraint: true
+})
+
+Team.hasMany(TeamUser, { foreignKey: 'teamId' })
+TeamUser.belongsTo(Team, { foreignKey: 'teamId' })
+User.hasMany(TeamUser, { foreignKey: 'userId' })
+TeamUser.belongsTo(User, { foreignKey: 'userId' })
+
+//RELACIONAMENTO N:N (Championship - Team)
+Team.belongsToMany(Championship, {
+  through: {
+    model: TeamChampionship
+  },
+  foreignKey: 'teamId',
+  constraint: true
+})
+
+Championship.belongsToMany(Team, {
+  through: {
+    model: TeamChampionship
+  },
+  foreignKey: 'championshipId',
+  constraint: true
+})
+
+Team.hasMany(TeamChampionship, { foreignKey: 'teamId' })
+TeamChampionship.belongsTo(Team, { foreignKey: 'teamId' })
+Championship.hasMany(TeamChampionship, { foreignKey: 'championshipId' })
+TeamChampionship.belongsTo(Championship, { foreignKey: 'championshipId' })
 
 module.exports = Team
 
