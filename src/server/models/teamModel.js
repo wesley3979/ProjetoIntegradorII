@@ -83,7 +83,8 @@ Championship.belongsToMany(Team, {
     model: TeamChampionship
   },
   foreignKey: 'championshipId',
-  constraint: true
+  constraint: true,
+  onDelete: 'cascade'
 })
 
 Team.hasMany(TeamChampionship, { foreignKey: 'teamId' })

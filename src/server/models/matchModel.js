@@ -17,6 +17,16 @@ Match.init({
     defaultValue: 'Created',
   },
 
+  team1name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+
+  team2name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+
   team1Id: {
     type: DataTypes.INTEGER,
     allowNull: false
@@ -76,7 +86,7 @@ Match.init({
   },
 
   winner: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING,
     allowNull: true,
   }
 },
@@ -88,6 +98,6 @@ Match.init({
   }
 )
 
-Championship.hasMany(Match, { foreignKey: 'championshipId' })
+Championship.hasMany(Match, { foreignKey: 'championshipId', onDelete: 'cascade' })
 
 module.exports = Match
