@@ -10,6 +10,11 @@ TeamChampionship.init({
     primaryKey: true,
   },
 
+  teamName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+
   matchesPlayed: {
     type: DataTypes.INTEGER,
     allowNull: false,

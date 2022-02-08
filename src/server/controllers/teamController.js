@@ -1,9 +1,9 @@
 const { Op } = require("sequelize");
-const { findByPk } = require('../models/teamModel')
 const Team = require('../models/teamModel')
 const User = require('../models/userModel')
 const Championship = require('../models/championshipModel')
 const Match = require('../models/matchModel')
+const TeamChampionship = require('../models/teamChampionshipModel')
 
 const getToken = require('../helpers/get-token')
 const getUserByToken = require('../helpers/get-user-by-token');
@@ -304,6 +304,60 @@ class TeamController {
 
     } catch (err) {
       return res.status(500).json({ message: 'Erro ao buscar partidas, tente novamente mais tarde.' })
+    }
+  }
+
+  async insertTeamIntoChampionship(req, res) {
+    try {
+
+      const { idteam, idchampionship } = req.params
+
+      const token = getToken(req)
+      const user = await getUserByToken(token)
+
+      if (!user)
+        return res.status(422).json({ message: `Token inválido.` })
+
+      const team = await Team.findByPk(idteam)
+
+      if (!team) {
+        return res.status(400).json({ message: 'Erro ao inserir equipe em torneio, pois o time informado não existe.' })
+      }
+
+      if (team.creatorUserId != user.userId) {
+        return res.status(400).json({ message: 'Erro, somente o criador da equipe pode realizar a inscrição da equipe no torneio' })
+      }
+
+      const championship = await Championship.findByPk(idchampionship)
+
+      if (!championship) {
+        return res.status(400).json({ message: 'Erro ao inserir equipe em torneio, o torneio informado não existe.' })
+      }
+
+      const existsTeam = await TeamChampionship.findOne({ where: { teamId: team.teamId } })
+
+      if (existsTeam) {
+        return res.status(400).json({
+          message: 'Erro, pois está equipe já está inscrita nesse torneio'
+        })
+      }
+
+      await TeamChampionship.create({
+        "teamName": team.name,
+        "matchesPlayed": 0,
+        "matchesWon": 0,
+        "matchesDrawn": 0,
+        "matchesLost": 0,
+        "Points": 0,
+        "teamId": team.teamId,
+        "championshipId": championship.championshipId
+      })
+
+      return res.status(200).json({ message: `${team.name} está participando do torneio: ${championship.name}` })
+
+
+    } catch (err) {
+      return res.status(500).json({ message: 'Erro ao inserir equipe em torneio, tente novamente mais tarde.' })
     }
   }
 

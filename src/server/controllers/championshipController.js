@@ -1,8 +1,7 @@
-const { Op } = require("sequelize");
-const { findByPk } = require('../models/championshipModel')
 const Championship = require('../models/championshipModel')
 const Team = require('../models/teamModel')
 const Match = require('../models/matchModel')
+const TeamChampionship = require('../models/teamChampionshipModel')
 
 const getToken = require('../helpers/get-token')
 const getUserByToken = require('../helpers/get-user-by-token')
@@ -209,7 +208,7 @@ class ChampionshipController {
         })
       }
 
-      var winner
+      var winner = null
       if (status == 'Concluded') {
         if (parseInt(goals1) > parseInt(goals2)) {
           winner = existsMatch.team1name
@@ -233,6 +232,54 @@ class ChampionshipController {
       }, { where: { matchId: idmatch } })
 
       if (updatedMatch) {
+        const match = await Match.findByPk(idmatch)
+
+        if (match.status == 'Concluded') {
+
+          let team1 = await TeamChampionship.findOne({
+            where: {
+              teamId: match.team1Id,
+              championshipId: idchampionship
+            }
+          })
+
+          let team2 = await TeamChampionship.findOne({
+            where: {
+              teamId: match.team2Id,
+              championshipId: idchampionship
+            }
+          })
+
+          //aux update ranking
+          if (winner == match.team1name) {
+            team1.matchesPlayed++
+            team1.matchesWon++
+            team1.Points = team1.Points + 3
+
+            team2.matchesPlayed++
+            team2.matchesLost++
+          }
+          if (!winner) {
+            team1.matchesPlayed++
+            team1.matchesDrawn++
+            team1.Points++
+
+            team2.matchesPlayed++
+            team2.matchesDrawn++
+            team2.Points++
+          }
+          if (winner == match.team2name) {
+            team1.matchesPlayed++
+            team1.matchesLost++
+
+            team2.matchesPlayed++
+            team2.matchesWon++
+            team2.Points = team2.Points + 3
+          }
+
+          await team1.save()
+          await team2.save()
+        }
         return res.status(200).json({ message: 'Partida atualizada com sucesso' })
       }
       else {
@@ -381,6 +428,28 @@ class ChampionshipController {
 
     return res.status(200).json({ message: 'O torneio foi iniciado com sucesso, verifique as partidas.' })
 
+  }
+
+  async getTableChampionshipId(req, res) {
+    const { id } = req.params
+
+    const exists = await Championship.findByPk(id)
+
+    if (!exists)
+      return res.status(422).json({ message: 'Erro, o torneio informado não existe.' })
+
+    if (exists.status != 'Started' && exists.status != 'Concluded')
+      return res.status(422).json({ message: 'Erro, este torneio ainda não foi iniciado.' })
+
+    const table = await TeamChampionship.findAll({
+      where: { championshipId: id },
+      order: [
+        ['Points', 'DESC'],
+        ['matchesWon', 'DESC'],
+      ],
+    })
+
+    return res.status(200).json({ table })
   }
 
 }
