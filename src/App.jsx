@@ -1,28 +1,28 @@
 import React from 'react'
-
-import {BrowserRouter as Router, Switch, Route} from 'react-router-dom'
-import Home from './pages/Home.jsx'
-import Login from './pages/Login.jsx'
-import Cadastro from './pages/Cadastro.jsx'
-import ListTorneios from './pages/ListTorneios.jsx'
-import ListEquipe from './pages/ListEquipe.jsx'
-import Perfil from './pages/Perfil.jsx'
-import OpenTorneio from './pages/OpenTorneio.jsx'
+import { Layout } from './components/Layout';
+import { UserProvider } from './providers/userContext';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   return (
-    <Router>
-      <Switch>
-        <Route path="/" exact={true} component={Login} />
-        <Route path="/home" exact={true} component={Home} />
-        <Route path="/cadastro" exact={true}  component={Cadastro} />            
-        <Route path="/list-torneios" exact={true}  component={ListTorneios} />            
-        <Route path="/list-equipe" exact={true}  component={ListEquipe} />            
-        <Route path="/perfil" exact={true}  component={Perfil} />            
-        <Route path="/open-torneio/:id?" exact={true}  component={OpenTorneio} />            
-      </Switch>
-    </Router>
+    <>
+      <UserProvider>
+        <Layout />
+      </UserProvider>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable={false}
+        pauseOnHover 
+      />
+    </>
   )
 }
 

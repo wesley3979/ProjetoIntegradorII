@@ -1,0 +1,33 @@
+.content-right{
+  height: 466px;
+}
+.content-left{
+  height: 466px;
+}
+.loginHeader{
+  height: 75px !important;
+}
+
+.divider::after{
+  content: "";
+  width: 45%;
+  height: 2px;
+  border-radius: 2px;
+  background: #DDD;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translate(123%, -50%);
+}
+
+.divider::before{
+  content: "";
+  width: 45%;
+  height: 2px;
+  border-radius: 2px;
+  background: #DDD;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
