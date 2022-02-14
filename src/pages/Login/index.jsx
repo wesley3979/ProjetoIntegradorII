@@ -1,16 +1,17 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Button, Col, Form, Row } from "react-bootstrap"
 import { ReactComponent as LoginSvg } from "../../assets/loginIcon.svg"
 import { ReactComponent as TorneioIcon } from "../../assets/torneioIcon.svg"
-import { requests } from "../../services/requests"
+import { api } from "../../services/api"
 import { useUser } from "../../providers/userContext"
 import "./style.css"
 import { useHistory } from "react-router-dom"
+import { toast } from "react-toastify"
 
 export const Login = () =>{
   const [loginEmail, setLoginEmail] = useState();
   const [password, setPassword] = useState();
-  const { setName, setUserId, setEmail, setImage, getUserData} = useUser();
+  const { setUserId, setToken } = useUser();
   const history = useHistory()
   const handlerEmail = ({target}) => {
     let { value } = target
@@ -27,21 +28,18 @@ export const Login = () =>{
       email: loginEmail,
       password
     }
-    let { userId } = await requests.login(obj);
-    console.log(userId);
-    setValues(userId);
+    try{
+      let res = await api.post('/user/login', obj)
+      console.log(res.data);
+      setToken(res.data.token);
+      setUserId(res.data.id);
+      toast.success(res.data.message);
+      history.push('/home');
+    }catch(e) {
+      toast.error(e.response.data.message);
+    }
   }
   
-  const setValues = async (id) =>{
-    let {findUser} = await requests.getUserById(id);
-
-    setEmail(findUser.email);
-    setUserId(findUser.userId);
-    setName(findUser.name);
-    setImage(findUser.image);
-
-    history.push('/home')
-  }
   return (
       <>
         <Row>

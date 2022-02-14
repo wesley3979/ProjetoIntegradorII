@@ -1,14 +1,9 @@
-function getToken(){
-  const token = localStorage.getItem('token');
-  
-  if(token === null) return null;
+export const auth = (token) => {
+  return{
+    headers: { 
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    }
 
-  return token;
-}
-
-export const auth = {
-  headers: { 
-      Authorization: `Bearer ${getToken()}`,
-      'Content-Type': 'application/json'
   }
 }

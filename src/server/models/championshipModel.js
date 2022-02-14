@@ -44,7 +44,7 @@ Championship.init({
     sequelize: connection,
     modelName: 'Championship',
     freezeTableName: true,
-    timestamps: true,
+    timestamps: false,
   }
 )
 

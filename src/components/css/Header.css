@@ -1,9 +1,37 @@
-div .nav{
-    background: linear-gradient(-90deg, rgba(0, 36, 36, 1) 0%, rgba(18, 2, 57, 1) 28%, rgba(80, 5, 73, 1) 100%);;
+.pageHeader{
+    height: 130px !important;
+    background: #4717F6 !important;
+    margin-bottom: 5%;
+}
+.icon{
+    background: #E5E5E5;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    padding: 2px 1px;
+    transform: translateY(-80%);
+}
+.dropDownIcon{
+    background: #E5E5E5;
+    width: 80px;    
+    height: 80px;
+    border-radius: 50%;
+ 
+}
+.dropdownToggle{
+    transform: translate(300%, -200%);
+
+}
+.userDropdown{
+    min-width: 350px;
+    padding: 10px;
+    border-radius: 10px;
+    background: #4717F6 !important;
+    transform: translate(-80%, 10%);
+    -webkit-box-shadow: 1px 2px 15px 5px #000000; 
+    box-shadow: 1px 2px 15px 5px #000000;
 }
 
-div .nav h1 {
-    margin-left: 1rem;
-    color: white;
+.menuItems:hover{
     cursor: pointer;
 }
